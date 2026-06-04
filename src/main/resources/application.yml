@@ -3,6 +3,10 @@ rsa:
   public-key: classpath:certs/public.pem
 
 spring:
+  devtools:
+    restart:
+      enabled: true
+      exclude: static/**,public/**
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
