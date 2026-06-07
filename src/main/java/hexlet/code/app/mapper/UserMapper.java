@@ -1,10 +1,16 @@
 package hexlet.code.app.mapper;
 
-import hexlet.code.app.dto.UserCreateDTO;
-import hexlet.code.app.dto.UserDTO;
-import hexlet.code.app.dto.UserUpdateDTO;
+import hexlet.code.app.dto.users.UserCreateDTO;
+import hexlet.code.app.dto.users.UserDTO;
+import hexlet.code.app.dto.users.UserUpdateDTO;
 import hexlet.code.app.model.User;
-import org.mapstruct.*;
+import org.mapstruct.BeforeMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -26,14 +32,8 @@ public abstract class UserMapper {
     @Mapping(target = "passwordDigest", source = "password")
     public abstract User map(UserCreateDTO dto);
 
-    @Mapping(target = "username", source = "email")
     @Mapping(target = "password", ignore = true)
     public abstract UserDTO map(User model);
 
-    @Mapping(target = "email", source = "username")
-    public abstract User map(UserDTO model);
-
-    public abstract User map(UserUpdateDTO model);
-
-    public abstract void update (UserUpdateDTO dto, @MappingTarget User model);
+    public abstract void update(UserUpdateDTO dto, @MappingTarget User model);
 }

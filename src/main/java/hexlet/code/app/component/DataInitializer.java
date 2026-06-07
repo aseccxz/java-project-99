@@ -1,25 +1,32 @@
 package hexlet.code.app.component;
 
 
+import hexlet.code.app.dto.labels.LabelCreateDTO;
+import hexlet.code.app.dto.statuses.TaskStatusCreateDTO;
 import hexlet.code.app.model.User;
-import hexlet.code.app.repository.UserRepository;
 import hexlet.code.app.service.CustomUserDetailsService;
-import hexlet.code.app.service.UserService;
+import hexlet.code.app.service.LabelService;
+import hexlet.code.app.service.TaskStatusService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @AllArgsConstructor
-public class DataInitializer implements ApplicationRunner {
+public final class DataInitializer implements ApplicationRunner {
 
     @Autowired
-    private final UserRepository userRepository;
+    private final TaskStatusService taskStatusService;
 
     @Autowired
     private final CustomUserDetailsService userService;
+
+    @Autowired
+    private final LabelService labelService;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -28,5 +35,20 @@ public class DataInitializer implements ApplicationRunner {
         user.setEmail(email);
         user.setPasswordDigest("qwerty");
         userService.createUser(user);
+
+        var defaultStatuses = List.of(
+              new TaskStatusCreateDTO("Draft", "draft"),
+              new TaskStatusCreateDTO("ToReview", "to_review"),
+              new TaskStatusCreateDTO("ToBeFixed", "to_be_fixed"),
+              new TaskStatusCreateDTO("ToPublish", "to_publish"),
+              new TaskStatusCreateDTO("Published", "published")
+        );
+        defaultStatuses.forEach(taskStatusService::create);
+
+        var defaultLabels = List.of(
+                new LabelCreateDTO("bug"),
+                new LabelCreateDTO("feature")
+        );
+        defaultLabels.forEach(labelService::create);
     }
 }
