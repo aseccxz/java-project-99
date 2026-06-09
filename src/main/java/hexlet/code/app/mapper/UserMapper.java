@@ -29,6 +29,7 @@ public abstract class UserMapper {
         var password = data.getPassword();
         data.setPassword(encoder.encode(password));
     }
+
     @Mapping(target = "passwordDigest", source = "password")
     public abstract User map(UserCreateDTO dto);
 
@@ -36,4 +37,7 @@ public abstract class UserMapper {
     public abstract UserDTO map(User model);
 
     public abstract void update(UserUpdateDTO dto, @MappingTarget User model);
+
+
+    public abstract UserCreateDTO mapToCreateDTO(User model);
 }
