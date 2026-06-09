@@ -32,10 +32,15 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17")
+	implementation("net.datafaker:datafaker:2.0.1")
+
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.h2database:h2")
 	annotationProcessor("org.projectlombok:lombok")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
+	testImplementation("org.instancio:instancio-junit:3.3.0")
+	testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testCompileOnly("org.projectlombok:lombok")
