@@ -87,7 +87,7 @@ public class UserControllerTest {
 
     @Test
     public void testIndex() throws Exception {
-        var response = mockMvc.perform(get("/api/users").with(jwt())).andExpect(status().isOk()).andReturn()
+        var response = mockMvc.perform(get("/api/users").with(token)).andExpect(status().isOk()).andReturn()
                 .getResponse();
         var body = response.getContentAsString();
 
@@ -96,9 +96,10 @@ public class UserControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        var request = get("/api/users/" + testUser.getId()).with(jwt());
+        var request = get("/api/users/" + testUser.getId()).with(token);
         var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
+
         assertThatJson(body).and(v -> v.node("email").isEqualTo(testUser.getEmail()),
                 v -> v.node("firstName").isEqualTo(testUser.getFirstName()),
                 v -> v.node("lastName").isEqualTo(testUser.getLastName()));
@@ -122,7 +123,7 @@ public class UserControllerTest {
     @Test
     public void testDestroy() throws Exception {
 
-        var request = delete("/api/users/{id}", testUser.getId()).with(token);
+        var request = delete("/api/users/" + testUser.getId()).with(token);
 
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
