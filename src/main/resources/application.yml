@@ -3,25 +3,11 @@ rsa:
   public-key: classpath:certs/public.pem
 
 spring:
-  devtools:
-    restart:
-      enabled: true
-      exclude: static/**,public/**
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-output:
-  ansi:
-  enabled: always    # цветной вывод логотипа
-logging:
-  pattern:
-    dateformat: "yyyy-MM-dd HH:mm:ss"  # кастомный формат даты в логах
+datasource:
+  driver-class-name: org.h2.Driver
+jpa:
+  ddl-auto: update
+  show-sql: true
+  properties:
+  hibernate:
+    format_sql: true
