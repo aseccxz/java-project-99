@@ -1,4 +1,4 @@
-package hexlet.code;
+package hexlet.code.utils;
 
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;

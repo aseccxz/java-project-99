@@ -1,7 +1,7 @@
 package hexlet.code.controller.api;
 
 import hexlet.code.dto.AuthRequest;
-import hexlet.code.JWTUtils;
+import hexlet.code.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
