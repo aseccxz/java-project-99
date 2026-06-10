@@ -1,4 +1,4 @@
-package hexlet.code.util.controller.api;
+package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.tasks.TaskCreateDTO;
