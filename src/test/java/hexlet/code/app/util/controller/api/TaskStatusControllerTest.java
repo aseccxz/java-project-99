@@ -9,6 +9,7 @@ import hexlet.code.app.repository.TaskStatusRepository;
 import hexlet.code.app.repository.UserRepository;
 import hexlet.code.app.util.ModelGenerator;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +68,8 @@ public class TaskStatusControllerTest {
 
     @BeforeEach
     public void setUp() {
-        taskStatusRepository.deleteAll();
-        userRepository.deleteAll();
+//        taskStatusRepository.deleteAll();
+//        userRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .apply(springSecurity()).build();
@@ -82,6 +83,12 @@ public class TaskStatusControllerTest {
         taskStatusRepository.save(testTaskStatus);
     }
 
+    @AfterEach
+    public void clear() {
+        taskStatusRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     public  void testCreate() throws Exception {
         var data = Instancio.of(modelGenerator.getStatusModel()).create();
@@ -93,11 +100,11 @@ public class TaskStatusControllerTest {
 
         mockMvc.perform(request).andExpect(status().isCreated());
 
-        TaskStatus taskStatus = taskStatusRepository.findById(testTaskStatus.getId()).orElse(null);
+        TaskStatus taskStatus = taskStatusRepository.findBySlug(data.getSlug()).orElse(null);
 
         assertNotNull(taskStatus);
-        assertThat(taskStatus.getName()).isEqualTo(testTaskStatus.getName());
-        assertThat(taskStatus.getSlug()).isEqualTo(testTaskStatus.getSlug());
+        assertThat(taskStatus.getName()).isEqualTo(data.getName());
+        assertThat(taskStatus.getSlug()).isEqualTo(data.getSlug());
     }
 
     @Test
