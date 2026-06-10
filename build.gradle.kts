@@ -60,5 +60,5 @@ tasks.jacocoTestReport {
 }
 
 application {
-	mainClass = "hexlet.code.app.AppApplication"
+	mainClass = "hexlet.code.AppApplication"
 }
