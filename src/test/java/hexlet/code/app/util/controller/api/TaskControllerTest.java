@@ -209,4 +209,44 @@ public class TaskControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    public void testIndexWithFilters() throws Exception {
+        var textTaskTitle = testTask.getName();
+        var testAssigneeId = testTask.getAssignee().getId();
+        var testStatus = testTask.getTaskStatus().getName();
+        Long testLabelId = testTask.getLabels()
+                .stream()
+                .map(Label::getId)
+                .findFirst()
+                .orElse(1L);
+
+        var result = mockMvc.perform(get("/api/tasks"
+                        + "?titleCont=" + textTaskTitle
+                        + "&assigneeId=" + testAssigneeId
+                        + "&status=" + testStatus
+                        + "&labelId=" + testLabelId).with(jwt()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+
+        assertThatJson(body).isArray().allSatisfy(element ->
+                assertThatJson(element)
+                        .and(v -> v.node("title").asString().contains(textTaskTitle))
+        );
+        assertThatJson(body).isArray().allSatisfy(element ->
+                assertThatJson(element)
+                        .and(v -> v.node("assignee_id").isEqualTo(testAssigneeId))
+        );
+        assertThatJson(body).isArray().allSatisfy(element ->
+                assertThatJson(element)
+                        .and(v -> v.node("status").asString().contains(testStatus))
+        );
+        assertThatJson(body).isArray().allSatisfy(element ->
+                assertThatJson(element)
+                        .and(v -> v.node("taskLabelIds").isArray().contains(testLabelId))
+        );
+    }
+
 }
