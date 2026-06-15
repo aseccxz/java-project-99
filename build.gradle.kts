@@ -30,6 +30,7 @@ dependencies {
 
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.h2database:h2")
+	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
