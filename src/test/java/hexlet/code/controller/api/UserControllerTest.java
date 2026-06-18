@@ -6,7 +6,6 @@ import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +20,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -56,7 +58,7 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
-        //userRepository.deleteAll();
+        userRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .apply(springSecurity()).build();
@@ -66,11 +68,6 @@ public class UserControllerTest {
         token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
     }
 
-    @AfterEach
-    public void clear() {
-        userRepository.deleteAll();
-    }
-
     @Test
     public void testCreate() throws Exception {
         var data = Instancio.of(modelGenerator.getUserModel()).create();
@@ -78,7 +75,12 @@ public class UserControllerTest {
 
         var request = post("/api/users").with(token).contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(createDTO));
-        mockMvc.perform(request).andExpect(status().isCreated());
+        mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(createDTO.getEmail()))
+                .andExpect(jsonPath("$.firstName").value(createDTO.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(createDTO.getLastName()))
+                .andExpect(jsonPath("$.password").doesNotExist());
 
         var user = userRepository.findByEmail(createDTO.getEmail()).orElse(null);
 
@@ -90,11 +92,16 @@ public class UserControllerTest {
 
     @Test
     public void testIndex() throws Exception {
-        var response = mockMvc.perform(get("/api/users").with(token)).andExpect(status().isOk()).andReturn()
-                .getResponse();
-        var body = response.getContentAsString();
 
-        assertThatJson(body).isArray();
+        mockMvc.perform(get("/api/users").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[*].id").isNotEmpty())
+                .andExpect(jsonPath("$[*].email").isNotEmpty())
+                .andExpect(jsonPath("$[*].firstName").isNotEmpty())
+                .andExpect(jsonPath("$[*].lastName").isNotEmpty())
+                .andExpect(jsonPath("$[*].password").doesNotExist())
+                .andExpect(jsonPath("$[*].email").value(hasItem(testUser.getEmail())));
     }
 
     @Test
@@ -117,7 +124,9 @@ public class UserControllerTest {
         var request = put("/api/users/" + testUser.getId()).with(token).contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
-        mockMvc.perform(request).andExpect(status().isOk());
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Mike"));
 
         var user = userRepository.findById(testUser.getId()).orElseThrow();
         assertThat(user.getFirstName()).isEqualTo(("Mike"));
@@ -130,5 +139,7 @@ public class UserControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
+
+        assertFalse(userRepository.existsById(testUser.getId()));
     }
 }

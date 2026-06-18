@@ -3,11 +3,18 @@ rsa:
   public-key: classpath:certs/public.pem
 
 spring:
-datasource:
-  driver-class-name: org.h2.Driver
-jpa:
-  ddl-auto: update
-  show-sql: true
-  properties:
-  hibernate:
-    format_sql: true
+  application:
+    name: app
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+
+  output:
+    ansi:
+      enabled: always
+
+  profiles:
+    default: development

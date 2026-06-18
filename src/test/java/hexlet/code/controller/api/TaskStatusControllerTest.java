@@ -9,7 +9,6 @@ import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
@@ -65,8 +67,8 @@ public class TaskStatusControllerTest {
 
     @BeforeEach
     public void setUp() {
-//        taskStatusRepository.deleteAll();
-//        userRepository.deleteAll();
+        taskStatusRepository.deleteAll();
+        userRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .apply(springSecurity()).build();
@@ -80,12 +82,6 @@ public class TaskStatusControllerTest {
         taskStatusRepository.save(testTaskStatus);
     }
 
-    @AfterEach
-    public void clear() {
-        taskStatusRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
     @Test
     public  void testCreate() throws Exception {
         var data = Instancio.of(modelGenerator.getStatusModel()).create();
@@ -95,7 +91,10 @@ public class TaskStatusControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(createDTO));
 
-        mockMvc.perform(request).andExpect(status().isCreated());
+        mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value(data.getName()))
+                .andExpect(jsonPath("$.slug").value(data.getSlug()));
 
         TaskStatus taskStatus = taskStatusRepository.findBySlug(data.getSlug()).orElse(null);
 
@@ -106,12 +105,14 @@ public class TaskStatusControllerTest {
 
     @Test
     public void testIndex() throws Exception {
-        var result = mockMvc.perform(get("/api/task_statuses").with(jwt()))
-                .andExpect(status().isOk())
-                .andReturn();
 
-        var body = result.getResponse().getContentAsString();
-        assertThatJson(body).isArray();
+        mockMvc.perform(get("/api/task_statuses").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[*].id").isNotEmpty())
+                .andExpect(jsonPath("$[*].name").isNotEmpty())
+                .andExpect(jsonPath("$[*].slug").isNotEmpty())
+                .andExpect(jsonPath("$[*].name").value(hasItem(testTaskStatus.getName())));
     }
 
     @Test
@@ -134,7 +135,9 @@ public class TaskStatusControllerTest {
         var request = put("/api/task_statuses/" + testTaskStatus.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
-        mockMvc.perform(request).andExpect(status().isOk());
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.slug").value("new slug"));
 
         var task = taskStatusRepository.findById(testTaskStatus.getId()).orElseThrow();
         assertThat(task.getSlug()).isEqualTo(("new slug"));
@@ -147,5 +150,7 @@ public class TaskStatusControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
+
+        assertFalse(taskStatusRepository.existsById(testTaskStatus.getId()));
     }
 }

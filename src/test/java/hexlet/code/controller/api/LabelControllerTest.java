@@ -9,7 +9,6 @@ import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
 import org.instancio.Instancio;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,8 @@ import java.util.HashMap;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -66,8 +68,8 @@ public class LabelControllerTest {
 
     @BeforeEach
     public void setUp() {
-//        labelRepository.deleteAll();
-//        userRepository.deleteAll();
+        labelRepository.deleteAll();
+        userRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .apply(springSecurity()).build();
@@ -81,12 +83,6 @@ public class LabelControllerTest {
         labelRepository.save(testLabel);
     }
 
-    @AfterEach
-    public void clear() {
-        labelRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
     @Test
     public void testCreate() throws Exception {
         var data = Instancio.of(modelGenerator.getLabelModel()).create();
@@ -96,7 +92,9 @@ public class LabelControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(createDTO));
 
-        mockMvc.perform(request).andExpect(status().isCreated());
+        mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value(data.getName()));
 
         Label label = labelRepository.findByName(data.getName()).orElse(null);
 
@@ -106,12 +104,13 @@ public class LabelControllerTest {
 
     @Test
     public void testIndex() throws Exception {
-        var result = mockMvc.perform(get("/api/labels").with(token))
-                .andExpect(status().isOk())
-                .andReturn();
 
-        var body = result.getResponse().getContentAsString();
-        assertThatJson(body).isArray();
+        mockMvc.perform(get("/api/labels").with(jwt()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[*].id").isNotEmpty())
+                .andExpect(jsonPath("$[*].name").isNotEmpty())
+                .andExpect(jsonPath("$[*].name").value(hasItem(testLabel.getName())));
     }
 
     @Test
@@ -133,7 +132,9 @@ public class LabelControllerTest {
         var request = put("/api/labels/" + testLabel.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
-        mockMvc.perform(request).andExpect(status().isOk());
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("new name"));
 
         var task = labelRepository.findById(testLabel.getId()).orElseThrow();
         assertThat(task.getName()).isEqualTo(("new name"));
@@ -146,5 +147,7 @@ public class LabelControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isNoContent());
+
+        assertFalse(labelRepository.existsById(testLabel.getId()));
     }
 }
