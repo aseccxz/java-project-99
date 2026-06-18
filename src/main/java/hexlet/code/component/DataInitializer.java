@@ -4,9 +4,9 @@ package hexlet.code.component;
 import hexlet.code.dto.labels.LabelCreateDTO;
 import hexlet.code.dto.statuses.TaskStatusCreateDTO;
 import hexlet.code.model.User;
-import hexlet.code.service.CustomUserDetailsService;
-import hexlet.code.service.LabelService;
-import hexlet.code.service.TaskStatusService;
+import hexlet.code.service.impl.CustomUserDetailsService;
+import hexlet.code.service.impl.LabelServiceImpl;
+import hexlet.code.service.impl.TaskStatusServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,9 +18,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public final class DataInitializer implements ApplicationRunner {
 
-    private final TaskStatusService taskStatusService;
+    private final TaskStatusServiceImpl taskStatusService;
     private final CustomUserDetailsService userService;
-    private final LabelService labelService;
+    private final LabelServiceImpl labelService;
 
     @Override
     public void run(ApplicationArguments args) {
