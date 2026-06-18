@@ -5,7 +5,7 @@ import hexlet.code.dto.labels.LabelDTO;
 import hexlet.code.dto.labels.LabelUpdateDTO;
 import hexlet.code.service.LabelService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,15 +22,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/labels")
+@RequiredArgsConstructor
 public final class LabelController {
-    @Autowired
-    LabelService labelService;
 
-    /*@GetMapping("")
-    @ResponseStatus(HttpStatus.OK)
-    public List<LabelDTO> index() {
-        return labelService.getAll();
-    }*/
+    private final LabelService labelService;
 
     @GetMapping(path = "")
     @ResponseStatus(HttpStatus.OK)

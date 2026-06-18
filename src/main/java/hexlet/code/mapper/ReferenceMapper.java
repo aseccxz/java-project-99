@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
         componentModel = MappingConstants.ComponentModel.SPRING
 )
 public abstract class ReferenceMapper {
+
     @Autowired
     private EntityManager entityManager;
 

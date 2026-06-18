@@ -7,8 +7,7 @@ import hexlet.code.model.User;
 import hexlet.code.service.CustomUserDetailsService;
 import hexlet.code.service.LabelService;
 import hexlet.code.service.TaskStatusService;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -16,16 +15,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public final class DataInitializer implements ApplicationRunner {
 
-    @Autowired
     private final TaskStatusService taskStatusService;
-
-    @Autowired
     private final CustomUserDetailsService userService;
-
-    @Autowired
     private final LabelService labelService;
 
     @Override

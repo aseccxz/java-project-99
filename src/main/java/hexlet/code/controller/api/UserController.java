@@ -5,9 +5,10 @@ import hexlet.code.dto.users.UserDTO;
 import hexlet.code.dto.users.UserUpdateDTO;
 import hexlet.code.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,15 +23,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/users")
-public final class UserController {
-    @Autowired
-    UserService userService;
+@RequiredArgsConstructor
+public class UserController {
 
-    /*@GetMapping("")
-    @ResponseStatus(HttpStatus.OK)
-    public List<UserDTO> index() {
-        return userService.getAll();
-    }*/
+    private final UserService userService;
 
     @GetMapping(path = "")
     @ResponseStatus(HttpStatus.OK)
@@ -55,12 +51,14 @@ public final class UserController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("@userUtils.isOwner(#id)")
     public UserDTO update(@Valid @RequestBody UserUpdateDTO userData, @PathVariable Long id) {
         return userService.update(userData, id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@userUtils.isOwner(#id)")
     public void delete(@PathVariable Long id) {
         userService.delete(id);
     }

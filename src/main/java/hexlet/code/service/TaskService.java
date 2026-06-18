@@ -9,22 +9,19 @@ import hexlet.code.mapper.TaskMapper;
 import hexlet.code.model.Task;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.specification.TaskSpecification;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public final class TaskService {
-    @Autowired
-    TaskRepository taskRepository;
+@RequiredArgsConstructor
+public class TaskService {
 
-    @Autowired
-    TaskMapper taskMapper;
-
-    @Autowired
-    TaskSpecification taskSpecification;
+    private final TaskRepository taskRepository;
+    private final TaskMapper taskMapper;
+    private final TaskSpecification taskSpecification;
 
     public List<TaskDTO> getAll(TaskParamsDTO params) {
         Specification<Task> spec = taskSpecification.build(params);
