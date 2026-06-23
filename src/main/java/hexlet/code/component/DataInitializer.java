@@ -4,6 +4,7 @@ package hexlet.code.component;
 import hexlet.code.dto.labels.LabelCreateDTO;
 import hexlet.code.dto.statuses.TaskStatusCreateDTO;
 import hexlet.code.model.User;
+import hexlet.code.repository.UserRepository;
 import hexlet.code.service.impl.CustomUserDetailsService;
 import hexlet.code.service.impl.LabelServiceImpl;
 import hexlet.code.service.impl.TaskStatusServiceImpl;
@@ -13,6 +14,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,10 +23,18 @@ public final class DataInitializer implements ApplicationRunner {
     private final TaskStatusServiceImpl taskStatusService;
     private final CustomUserDetailsService userService;
     private final LabelServiceImpl labelService;
+    private final UserRepository userRepository;
 
     @Override
     public void run(ApplicationArguments args) {
+
         var email = "hexlet@example.com";
+        Optional<User> firstUser = userRepository.findByEmail(email);
+
+        if(firstUser.isPresent()) {
+            return;
+        }
+
         var user = new User();
         user.setEmail(email);
         user.setPasswordDigest("qwerty");
