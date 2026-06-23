@@ -31,7 +31,7 @@ public final class DataInitializer implements ApplicationRunner {
         var email = "hexlet@example.com";
         Optional<User> firstUser = userRepository.findByEmail(email);
 
-        if(firstUser.isPresent()) {
+        if (firstUser.isPresent()) {
             return;
         }
 
